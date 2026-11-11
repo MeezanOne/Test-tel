@@ -43,6 +43,24 @@
     footer { border-top: 1px solid var(--border); padding: 32px 0; text-align: center; color: var(--muted);
              font-family: system-ui, sans-serif; font-size: 0.9rem; }
 
+    .item { cursor: pointer; transition: transform .15s, box-shadow .15s; }
+    .item:hover, .item:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.08); outline: none; }
+    .cart-count { background: var(--accent); color: #fff; border-radius: 999px; padding: 1px 8px; font-size: .8rem; margin-left: 4px; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
+    .modal.open { display: flex; }
+    .modal-box { background: var(--card); border-radius: 16px; padding: 32px; max-width: 420px; width: 100%; position: relative; font-family: system-ui, sans-serif; }
+    .modal-box h3 { font-family: Georgia, serif; font-size: 1.5rem; margin-bottom: 8px; }
+    .modal-box p { color: var(--muted); margin-bottom: 12px; }
+    .modal-close { position: absolute; top: 10px; right: 14px; background: none; border: 0; font-size: 1.8rem; cursor: pointer; color: var(--muted); }
+    .modal-details { list-style: none; margin-bottom: 16px; font-size: .9rem; color: var(--muted); }
+    .modal-details li { padding: 4px 0; border-bottom: 1px solid var(--border); }
+    .modal-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .qty { display: inline-flex; align-items: center; gap: 10px; }
+    .qty button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: #fff; font-size: 1.1rem; cursor: pointer; }
+    .btn-full { width: 100%; border: 0; cursor: pointer; font-size: 1rem; text-align: center; }
+    .toast { margin-top: 10px; text-align: center; color: #1f4d2e; font-size: .9rem; min-height: 1.2em; }
+
     @media (max-width: 600px) {
       nav ul { gap: 14px; font-size: 0.85rem; }
       .hero { padding: 64px 0 56px; }
@@ -58,6 +76,7 @@
           <li><a href="#menu">Menu</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
+          <li><a href="cart.html">Cart<span class="cart-count" id="cartCount">0</span></a></li>
         </ul>
       </nav>
     </div>
@@ -111,5 +130,76 @@
       <p>Open daily 8 AM – 9 PM · hello@brewandbean.example · © 2026 Brew & Bean</p>
     </div>
   </footer>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mName">
+      <button class="modal-close" id="mClose" aria-label="Close">&times;</button>
+      <h3 id="mName"></h3>
+      <p id="mDesc"></p>
+      <ul class="modal-details" id="mDetails"></ul>
+      <div class="modal-row">
+        <span class="price" id="mPrice"></span>
+        <span class="qty">
+          <button type="button" id="mMinus" aria-label="Decrease">−</button>
+          <span id="mQty">1</span>
+          <button type="button" id="mPlus" aria-label="Increase">+</button>
+        </span>
+      </div>
+      <button type="button" class="btn btn-full" id="mAdd">Add to cart</button>
+      <div class="toast" id="mToast"></div>
+    </div>
+  </div>
+
+  <script>
+    var DETAILS = {
+      "Espresso": ["Size: 60 ml double shot", "Roast: Dark", "Served hot"],
+      "Cappuccino": ["Size: 200 ml", "Roast: Medium-dark", "Served hot, with milk"],
+      "Cold Brew": ["Size: 300 ml", "Steeped 18 hours", "Served chilled over ice"],
+      "Masala Chai": ["Size: 180 ml", "Ginger, cardamom and spices", "Served hot, with milk"]
+    };
+    function getCart() { try { return JSON.parse(localStorage.getItem("cart")) || []; } catch (e) { return []; } }
+    function saveCart(c) { try { localStorage.setItem("cart", JSON.stringify(c)); } catch (e) {} updateCount(); }
+    function updateCount() {
+      var n = getCart().reduce(function (s, i) { return s + i.qty; }, 0);
+      document.getElementById("cartCount").textContent = n;
+    }
+    var modal = document.getElementById("modal"), current = null, qty = 1;
+    function setQty(q) { qty = Math.max(1, Math.min(20, q)); document.getElementById("mQty").textContent = qty; }
+    function openModal(item) {
+      current = {
+        name: item.querySelector("h3").textContent,
+        desc: item.querySelector("p").textContent,
+        price: parseInt(item.querySelector(".price").textContent.replace(/[^0-9]/g, ""), 10)
+      };
+      document.getElementById("mName").textContent = current.name;
+      document.getElementById("mDesc").textContent = current.desc;
+      document.getElementById("mPrice").textContent = "₹" + current.price;
+      document.getElementById("mDetails").innerHTML = (DETAILS[current.name] || []).map(function (d) { return "<li>" + d + "</li>"; }).join("");
+      document.getElementById("mToast").textContent = "";
+      setQty(1);
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+    function closeModal() { modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); }
+    document.querySelectorAll(".item").forEach(function (item) {
+      item.tabIndex = 0;
+      item.setAttribute("role", "button");
+      item.addEventListener("click", function () { openModal(item); });
+      item.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openModal(item); } });
+    });
+    document.getElementById("mClose").onclick = closeModal;
+    modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+    document.getElementById("mMinus").onclick = function () { setQty(qty - 1); };
+    document.getElementById("mPlus").onclick = function () { setQty(qty + 1); };
+    document.getElementById("mAdd").onclick = function () {
+      var cart = getCart(), found = cart.filter(function (i) { return i.name === current.name; })[0];
+      if (found) found.qty += qty; else cart.push({ name: current.name, price: current.price, qty: qty });
+      saveCart(cart);
+      document.getElementById("mToast").textContent = "Added to cart ✓";
+      setTimeout(closeModal, 700);
+    };
+    updateCount();
+  </script>
 </body>
 </html>
