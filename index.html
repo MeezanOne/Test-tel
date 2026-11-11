@@ -43,8 +43,30 @@
     footer { border-top: 1px solid var(--border); padding: 32px 0; text-align: center; color: var(--muted);
              font-family: system-ui, sans-serif; font-size: 0.9rem; }
 
-    .item { cursor: pointer; transition: transform .15s, box-shadow .15s; }
-    .item:hover, .item:focus-visible { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.08); outline: none; }
+    html { scroll-behavior: smooth; }
+    .menu { perspective: 900px; }
+    .item { cursor: pointer; transform-style: preserve-3d; will-change: transform;
+            transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; }
+    .item.reveal.in:hover, .item.reveal.in:focus-visible, .item:hover, .item:focus-visible { transform: translateY(-6px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+            box-shadow: 0 18px 36px rgba(43,33,24,.18), 0 4px 8px rgba(43,33,24,.08); outline: none; }
+    .item h3, .item .price { transform: translateZ(30px); display: block; }
+    .item img { transform: translateZ(20px); }
+    .btn { transition: transform .25s ease, box-shadow .25s ease; box-shadow: 0 4px 0 #14341f, 0 8px 18px rgba(31,77,46,.3); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #14341f, 0 12px 22px rgba(31,77,46,.35); }
+    .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #14341f; }
+    nav ul a { transition: color .2s ease; }
+    nav ul a:hover { color: var(--accent); }
+    .hero { perspective: 800px; }
+    .hero h1 { text-shadow: 0 1px 0 #e8e0d5, 0 2px 0 #ddd3c5, 0 3px 0 #d2c7b6, 0 8px 14px rgba(43,33,24,.2); }
+    .reveal { opacity: 0; transform: translateY(24px) rotateX(8deg); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+    .modal-box { animation: pop .35s cubic-bezier(.2,.8,.2,1); }
+    @keyframes pop { from { opacity: 0; transform: perspective(800px) rotateX(-12deg) translateY(20px) scale(.96); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .item, .btn, .reveal, .modal-box { transition: none; animation: none; }
+      .reveal { opacity: 1; transform: none; }
+    }
     .cart-count { background: var(--accent); color: #fff; border-radius: 999px; padding: 1px 8px; font-size: .8rem; margin-left: 4px; }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
@@ -61,9 +83,45 @@
     .btn-full { width: 100%; border: 0; cursor: pointer; font-size: 1rem; text-align: center; }
     .toast { margin-top: 10px; text-align: center; color: #1f4d2e; font-size: .9rem; min-height: 1.2em; }
 
+    #cup3d { width: 100%; max-width: 420px; height: 300px; margin: 24px auto 0; cursor: grab; touch-action: pan-y; }
+    #cup3d canvas { display: block; width: 100% !important; height: 100% !important; }
+
+    .burger { display: none; width: 44px; height: 44px; background: none; border: 0; cursor: pointer; flex-direction: column; justify-content: center; align-items: center; gap: 5px; border-radius: 12px; }
+    .burger span { display: block; width: 24px; height: 2.5px; background: var(--text); border-radius: 2px; transition: transform .3s ease, opacity .3s ease; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(20,12,6,.55); backdrop-filter: blur(3px); opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility .35s; z-index: 200; }
+    .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(80vw, 320px); background: linear-gradient(160deg, #fffaf3, #f3e6d3); box-shadow: -12px 0 40px rgba(0,0,0,.25);
+              transform: translateX(105%); transition: transform .4s cubic-bezier(.2,.8,.2,1); z-index: 201; display: none; flex-direction: column; padding: 20px 24px; font-family: system-ui, sans-serif; border-radius: 24px 0 0 24px; }
+    .drawer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .drawer-logo { font-family: Georgia, serif; font-size: 1.3rem; font-weight: bold; }
+    .drawer-close { background: #fff; border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; font-size: 1.6rem; line-height: 1; cursor: pointer; color: var(--muted); }
+    .drawer-links { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .drawer-links a { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--border); text-decoration: none; font-size: 1.05rem; font-weight: 600;
+                      opacity: 0; transform: translateX(24px); transition: opacity .4s ease, transform .4s ease, background .2s, color .2s; }
+    .drawer-links a:hover, .drawer-links a:active { background: var(--accent); color: #fff; }
+    .drawer-links .cart-count { margin-left: auto; }
+    .drawer-foot { margin-top: auto; color: var(--muted); font-size: .85rem; text-align: center; }
+    body.drawer-open .drawer-overlay { opacity: 1; visibility: visible; }
+    body.drawer-open .drawer { transform: none; }
+    body.drawer-open .drawer-links a { opacity: 1; transform: none; }
+    body.drawer-open .drawer-links li:nth-child(1) a { transition-delay: .10s; }
+    body.drawer-open .drawer-links li:nth-child(2) a { transition-delay: .16s; }
+    body.drawer-open .drawer-links li:nth-child(3) a { transition-delay: .22s; }
+    body.drawer-open .drawer-links li:nth-child(4) a { transition-delay: .28s; }
+    body.drawer-open { overflow: hidden; }
+
     @media (max-width: 600px) {
-      nav ul { gap: 14px; font-size: 0.85rem; }
-      .hero { padding: 64px 0 56px; }
+      nav { padding: 14px 0; }
+      nav ul { display: none; }
+      .burger { display: flex; }
+      .drawer { display: flex; }
+      .hero { padding: 32px 24px 24px; }
+      .hero h1 { margin-bottom: 12px; }
+      .hero p { margin-bottom: 20px; }
+      #cup3d { height: 240px; margin-top: 12px; }
+      section { padding: 32px 0; }
+      h2 { margin-bottom: 20px; font-size: 1.6rem; }
+      .item { padding: 18px; }
+      footer { padding: 20px 0; }
     }
   </style>
 </head>
@@ -78,15 +136,32 @@
           <li><a href="#contact">Contact</a></li>
           <li><a href="cart.html">Cart<span class="cart-count" id="cartCount">0</span></a></li>
         </ul>
+        <button type="button" class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="drawer"><span></span><span></span><span></span></button>
       </nav>
     </div>
   </header>
+
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true" aria-label="Site menu">
+    <div class="drawer-head">
+      <span class="drawer-logo">Brew &amp; Bean</span>
+      <button type="button" class="drawer-close" id="drawerClose" aria-label="Close menu">&times;</button>
+    </div>
+    <ul class="drawer-links">
+      <li><a href="#menu">☕ Menu</a></li>
+      <li><a href="#about">📖 About</a></li>
+      <li><a href="#contact">📍 Contact</a></li>
+      <li><a href="cart.html">🛒 Cart<span class="cart-count cart-count-2">0</span></a></li>
+    </ul>
+    <p class="drawer-foot">Open daily 8 AM – 9 PM</p>
+  </aside>
 
   <main>
     <div class="hero wrap">
       <h1>Meezan roasted coffee,<br>made with care</h1>
       <p>Small-batch beans, roasted every morning and served by people who love what they do.</p>
       <a href="#menu" class="btn">Watch Menu</a>
+      <div id="cup3d" role="img" aria-label="Rotating 3D coffee cup"></div>
     </div>
 
     <section id="menu">
@@ -132,6 +207,95 @@
     </div>
   </footer>
 
+  <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
+  <script type="module">
+    import * as THREE from "three";
+    var box = document.getElementById("cup3d");
+    try {
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      camera.position.set(0, 3.2, 7.5);
+      camera.lookAt(0, 0.4, 0);
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      box.appendChild(renderer.domElement);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+      var sun = new THREE.DirectionalLight(0xffffff, 1.1);
+      sun.position.set(4, 6, 5);
+      scene.add(sun);
+
+      var group = new THREE.Group();
+      scene.add(group);
+      var white = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.05 });
+      white.side = THREE.DoubleSide;
+
+      // cup body (lathe profile)
+      var pts = [[0,0],[0.9,0],[1.1,0.1],[1.4,0.9],[1.5,1.7],[1.42,1.7],[1.32,0.95],[1.05,0.2],[0,0.2]]
+        .map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+      var cup = new THREE.Mesh(new THREE.LatheGeometry(pts, 64), white);
+      cup.position.y = 0.15;
+      group.add(cup);
+
+      // coffee surface
+      var coffee = new THREE.Mesh(new THREE.CircleGeometry(1.36, 64),
+        new THREE.MeshStandardMaterial({ color: 0x4a2a14, roughness: 0.3 }));
+      coffee.rotation.x = -Math.PI / 2;
+      coffee.position.y = 1.65;
+      group.add(coffee);
+
+      // handle
+      var handle = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.12, 16, 40, Math.PI * 1.2), white);
+      handle.position.set(1.5, 1.0, 0);
+      handle.rotation.z = -Math.PI * 0.6;
+      group.add(handle);
+
+      // saucer
+      var sp = [[0,0],[1.9,0],[2.5,0.2],[2.6,0.3],[2.5,0.28],[1.9,0.08],[0,0.08]]
+        .map(function (p) { return new THREE.Vector2(p[0], p[1]); });
+      group.add(new THREE.Mesh(new THREE.LatheGeometry(sp, 64), white));
+
+      // coffee beans
+      var beanMat = new THREE.MeshStandardMaterial({ color: 0x3b2314, roughness: 0.5 });
+      for (var i = 0; i < 6; i++) {
+        var b = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), beanMat);
+        b.scale.set(1, 0.65, 0.7);
+        var a = i * 1.05 + 0.3, r = 2.05 + (i % 2) * 0.15;
+        b.position.set(Math.cos(a) * r, 0.3, Math.sin(a) * r);
+        b.rotation.y = a * 2;
+        group.add(b);
+      }
+      group.rotation.x = 0.1;
+
+      function resize() {
+        var w = box.clientWidth, h = box.clientHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      var dragging = false, lastX = 0, vel = 0.008;
+      box.addEventListener("pointerdown", function (e) { dragging = true; lastX = e.clientX; box.style.cursor = "grabbing"; });
+      window.addEventListener("pointerup", function () { dragging = false; box.style.cursor = "grab"; });
+      window.addEventListener("pointermove", function (e) {
+        if (dragging) { group.rotation.y += (e.clientX - lastX) * 0.01; lastX = e.clientX; }
+      });
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var t = 0;
+      (function loop() {
+        requestAnimationFrame(loop);
+        t += 0.016;
+        if (!dragging && !reduce) group.rotation.y += 0.008;
+        group.position.y = reduce ? 0 : Math.sin(t * 1.5) * 0.08;
+        renderer.render(scene, camera);
+      })();
+    } catch (err) {
+      box.style.display = "none";
+    }
+  </script>
+
   <div class="modal" id="modal" aria-hidden="true">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mName">
       <button class="modal-close" id="mClose" aria-label="Close">&times;</button>
@@ -163,7 +327,19 @@
     function updateCount() {
       var n = getCart().reduce(function (s, i) { return s + i.qty; }, 0);
       document.getElementById("cartCount").textContent = n;
+      document.querySelectorAll(".cart-count-2").forEach(function (el) { el.textContent = n; });
     }
+    var burger = document.getElementById("burger"), drawer = document.getElementById("drawer");
+    function setDrawer(open) {
+      document.body.classList.toggle("drawer-open", open);
+      burger.setAttribute("aria-expanded", open);
+      drawer.setAttribute("aria-hidden", !open);
+    }
+    burger.onclick = function () { setDrawer(true); };
+    document.getElementById("drawerClose").onclick = function () { setDrawer(false); };
+    document.getElementById("drawerOverlay").onclick = function () { setDrawer(false); };
+    drawer.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { setDrawer(false); }); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") setDrawer(false); });
     var modal = document.getElementById("modal"), current = null, qty = 1;
     function setQty(q) { qty = Math.max(1, Math.min(20, q)); document.getElementById("mQty").textContent = qty; }
     function openModal(item) {
@@ -198,9 +374,35 @@
       if (found) found.qty += qty; else cart.push({ name: current.name, price: current.price, qty: qty });
       saveCart(cart);
       document.getElementById("mToast").textContent = "Added to cart ✓";
-      setTimeout(closeModal, 700);
+      setTimeout(function () { window.location.href = "cart.html"; }, 500);
     };
     updateCount();
+
+    // 3D tilt on menu cards
+    document.querySelectorAll(".item").forEach(function (item) {
+      item.addEventListener("mousemove", function (e) {
+        var r = item.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        item.style.setProperty("--ry", (x * 14) + "deg");
+        item.style.setProperty("--rx", (-y * 14) + "deg");
+      });
+      item.addEventListener("mouseleave", function () {
+        item.style.setProperty("--rx", "0deg");
+        item.style.setProperty("--ry", "0deg");
+      });
+    });
+
+    // Smooth reveal on scroll
+    var revealEls = document.querySelectorAll(".item, .about, h2");
+    revealEls.forEach(function (el) { el.classList.add("reveal"); });
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+      }, { threshold: 0.15 });
+      revealEls.forEach(function (el) { io.observe(el); });
+    } else {
+      revealEls.forEach(function (el) { el.classList.add("in"); });
+    }
   </script>
 </body>
 </html>
