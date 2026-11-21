@@ -159,7 +159,7 @@
     .cta h2 { margin-bottom: 8px; }
     .cta p { color: var(--muted); margin-bottom: 24px; }
     .signup { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
-    .signup input { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit; font-size: .95rem; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+    .signup input { flex: 1; min-width: 200px; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font: inherit; font-size: 16px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
     .signup input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--glow); }
     .signup-msg { margin-top: 12px; color: var(--ok); font-size: .9rem; min-height: 1.3em; }
 
@@ -181,11 +181,6 @@
     .reveal.in { opacity: 1; transform: none; }
     .modal-box { animation: pop .3s cubic-bezier(.2,.8,.2,1); }
     @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .item, .btn, .reveal, .modal-box, .feature, .quote { transition: none; animation: none; }
-      .reveal { opacity: 1; transform: none; }
-    }
     .cart-count { background: var(--accent); color: #fff; border-radius: 999px; padding: 0 7px; font-size: .7rem; font-weight: 600; line-height: 1.5; margin-left: 6px; }
 
     .modal { position: fixed; inset: 0; background: var(--overlay); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 300; }
@@ -551,7 +546,7 @@
       window.addEventListener("pointermove", function (e) {
         if (dragging) { group.rotation.y += (e.clientX - lastX) * 0.01; lastX = e.clientX; }
       });
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var reduce = false;
       (function loop() {
         requestAnimationFrame(loop);
         if (!reduce) {
